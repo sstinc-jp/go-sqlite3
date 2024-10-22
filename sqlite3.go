@@ -539,6 +539,7 @@ func (c *SQLiteConn) RegisterUpdateHook(callback func(int, string, string, int64
 // depending on operation. More details see:
 // https://www.sqlite.org/c3ref/c_alter_table.html
 func (c *SQLiteConn) RegisterAuthorizer(callback func(int, string, string, string) int) {
+	deleteHandles(c)
 	if callback == nil {
 		C.sqlite3_set_authorizer(c.db, nil, nil)
 	} else {
