@@ -78,6 +78,13 @@ _sqlite3_exec(sqlite3* db, const char* pcmd, long long* rowid, long long* change
   return rv;
 }
 
+static int
+_sqlite3_getinfo(sqlite3* db, long long *rowid, long long* totalchanges)
+{
+  *rowid = (long long) sqlite3_last_insert_rowid(db);
+  *totalchanges = (long long) sqlite3_total_changes(db);
+}
+
 #ifdef SQLITE_ENABLE_UNLOCK_NOTIFY
 extern int _sqlite3_step_blocking(sqlite3_stmt *stmt);
 extern int _sqlite3_step_row_blocking(sqlite3_stmt* stmt, long long* rowid, long long* changes);
@@ -1976,6 +1983,12 @@ func (s *SQLiteStmt) execSync(args []namedValue) (driver.Result, error) {
 	}
 
 	return &SQLiteResult{id: int64(rowid), changes: int64(changes)}, nil
+}
+
+func (s *SQLiteConn) GetInfo() (rowid, totalChanges int64) {
+	var crowid, ctotalchanges C.longlong
+	C._sqlite3_getinfo(s.db, &crowid, &ctotalchanges)
+	return int64(crowid), int64(ctotalchanges)
 }
 
 // Close the rows.
